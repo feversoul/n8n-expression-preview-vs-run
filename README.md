@@ -107,7 +107,7 @@ To try a case, import its file from `workflows/` into any n8n, activate it, and 
 The preview itself was looked at by hand, not in the test suite: a headless Chromium opened the editor of n8n 2.46.7, ran the workflow there, opened Edit Fields and read the "Result" box under the expression. Seen for cases 01, 02, 03, 04, 05, 06 and 11:
 
 - After a run in the editor, the preview and the output of that run agreed every time. Where the run gave `null`, the preview showed `[undefined]`.
-- With `start` pinned and nothing run yet (02, 03), the preview showed `[Execute previous nodes for preview]` for this expression. After one run in the editor it showed the pinned message.
+- With `start` pinned and nothing run yet (02, 03), the preview showed `[Execute previous nodes for preview]` for this expression. After one run in the editor (tried on 03) it showed the pinned message.
 
 ## What was not tested, and other limits
 
