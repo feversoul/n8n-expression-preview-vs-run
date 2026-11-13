@@ -1,0 +1,158 @@
+{
+  "id": "exprlab-07-not-on-path",
+  "name": "expr lab 07-not-on-path: start is behind an IF this run did not take",
+  "nodes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000071",
+      "position": [
+        0,
+        0
+      ],
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "exprlab-07-not-on-path",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "exprlab/07-not-on-path",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000072",
+      "position": [
+        220,
+        0
+      ],
+      "name": "Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return ($('Webhook').first().json.body.items ?? [{ id: 1 }]).map((json) => ({ json }));"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000073",
+      "position": [
+        440,
+        0
+      ],
+      "name": "Use start?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000070",
+              "leftValue": "={{ $json.use_start === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000074",
+      "position": [
+        660,
+        0
+      ],
+      "name": "start",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Stands in for the step that fails (a decrypt step in the thread).\nif ($json.fail) return { json: { error: $json.fail } };\nreturn { json: { id: $json.id, status: 'processed' } };"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000075",
+      "position": [
+        880,
+        200
+      ],
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"e_event\": \"PROCESSOR_REQUEST_FAILED\",\n  \"msg\": {{ $('start').all()[0].json.error }}\n}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Items": {
+      "main": [
+        [
+          {
+            "node": "Use start?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use start?": {
+      "main": [
+        [
+          {
+            "node": "start",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

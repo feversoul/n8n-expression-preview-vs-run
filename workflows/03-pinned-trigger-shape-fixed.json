@@ -1,0 +1,56 @@
+{
+  "id": "exprlab-03-pinned-trigger-shape-fixed",
+  "name": "expr lab 03-pinned-trigger-shape-fixed: read the field where the live webhook puts it",
+  "nodes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "position": [
+        0,
+        0
+      ],
+      "name": "start",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "exprlab-03-pinned-trigger-shape-fixed",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "exprlab/03-pinned-trigger-shape-fixed",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000020",
+      "position": [
+        220,
+        0
+      ],
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"e_event\": \"PROCESSOR_REQUEST_FAILED\",\n  \"msg\": {{ JSON.stringify($('start').first().json.body.error ?? null) }}\n}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

@@ -1,0 +1,65 @@
+{
+  "id": "exprlab-03-pinned-trigger-shape-broken",
+  "name": "expr lab 03-pinned-trigger-shape-broken: start is a trigger pinned with { error }",
+  "nodes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000017",
+      "position": [
+        0,
+        0
+      ],
+      "name": "start",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "exprlab-03-pinned-trigger-shape-broken",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "exprlab/03-pinned-trigger-shape-broken",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000018",
+      "position": [
+        220,
+        0
+      ],
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"e_event\": \"PROCESSOR_REQUEST_FAILED\",\n  \"msg\": {{ $('start').all()[0].json.error }}\n}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "error": "error:1C80006B:Provider routines::wrong final block length"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

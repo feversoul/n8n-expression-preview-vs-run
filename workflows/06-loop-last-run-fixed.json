@@ -1,0 +1,182 @@
+{
+  "id": "exprlab-06-loop-last-run-fixed",
+  "name": "expr lab 06-loop-last-run-fixed: filter the failed items on the done output",
+  "nodes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000044",
+      "position": [
+        0,
+        0
+      ],
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "exprlab-06-loop-last-run-fixed",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "exprlab/06-loop-last-run-fixed",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000045",
+      "position": [
+        220,
+        0
+      ],
+      "name": "Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return ($('Webhook').first().json.body.items ?? [{ id: 1 }]).map((json) => ({ json }));"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000046",
+      "position": [
+        440,
+        0
+      ],
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "parameters": {
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000047",
+      "position": [
+        660,
+        200
+      ],
+      "name": "start",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Stands in for the step that fails (a decrypt step in the thread).\nif ($json.fail) return { json: { error: $json.fail } };\nreturn { json: { id: $json.id, status: 'processed' } };"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000048",
+      "position": [
+        660,
+        0
+      ],
+      "name": "Failed only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-4000-8000-000000000038",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000049",
+      "position": [
+        880,
+        0
+      ],
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"e_event\": \"PROCESSOR_REQUEST_FAILED\",\n  \"msg\": {{ JSON.stringify($json.error ?? null) }}\n}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Items": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Failed only",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failed only": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

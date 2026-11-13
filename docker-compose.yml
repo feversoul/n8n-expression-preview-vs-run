@@ -1,0 +1,40 @@
+# n8n with every case workflow imported and active, and a small stand-in
+# service for the HTTP cases.
+#   docker compose up -d      editor on http://localhost:5678
+# The first start imports and publishes the workflows, which takes a few
+# minutes.
+
+services:
+  n8n:
+    image: ${N8N_IMAGE:-n8nio/n8n:2.46.7}
+    restart: unless-stopped
+    entrypoint: ["sh", "/bootstrap/bootstrap.sh"]
+    environment:
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-expression-lab-local-key}
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678/}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      # vm is the default of this n8n version; legacy is the engine the editor
+      # preview uses.
+      N8N_EXPRESSION_ENGINE: ${N8N_EXPRESSION_ENGINE:-vm}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/bootstrap/workflows:ro
+      - ./docker/bootstrap.sh:/bootstrap/bootstrap.sh:ro
+      - ./docker/prepare.mjs:/bootstrap/prepare.mjs:ro
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+
+  # Answers the HTTP Request nodes. Nothing is forwarded anywhere.
+  standin:
+    image: node:22-alpine
+    restart: unless-stopped
+    command: ["node", "/app/standin.mjs"]
+    read_only: true
+    volumes:
+      - ./docker/standin.mjs:/app/standin.mjs:ro
+    ports:
+      - "${STANDIN_PORT:-8080}:8080"
+
+volumes:
+  n8n_data:

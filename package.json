@@ -1,0 +1,14 @@
+{
+  "name": "n8n-expression-preview-vs-run",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Why an n8n expression shows a value in the editor preview and null in the run: each suspected cause as a small workflow, broken and fixed, with the executed output asserted on n8n 2.46.7 and 2.47.7",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test:e2e": "node scripts/e2e.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

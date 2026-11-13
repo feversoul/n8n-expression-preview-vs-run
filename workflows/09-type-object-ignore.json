@@ -1,0 +1,117 @@
+{
+  "id": "exprlab-09-type-object-ignore",
+  "name": "expr lab 09-type-object-ignore: Object field, Ignore Type Conversion Errors",
+  "nodes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000111",
+      "position": [
+        0,
+        0
+      ],
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "exprlab-09-type-object-ignore",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "exprlab/09-type-object-ignore",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000112",
+      "position": [
+        220,
+        0
+      ],
+      "name": "Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return ($('Webhook').first().json.body.items ?? [{ id: 1 }]).map((json) => ({ json }));"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000113",
+      "position": [
+        440,
+        0
+      ],
+      "name": "start",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "if ($json.fail && $json.as_object) return { json: { error: { message: $json.fail } } };\nif ($json.fail) return { json: { error: $json.fail } };\nreturn { json: { id: $json.id, status: 'processed' } };"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000114",
+      "position": [
+        660,
+        0
+      ],
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000110",
+              "name": "msg",
+              "value": "={{ $('start').all()[0].json.error }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Items": {
+      "main": [
+        [
+          {
+            "node": "start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

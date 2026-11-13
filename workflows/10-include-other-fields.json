@@ -1,0 +1,106 @@
+{
+  "id": "exprlab-10-include-other-fields",
+  "name": "expr lab 10-include-other-fields: JSON mode with Include Other Input Fields",
+  "nodes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000115",
+      "position": [
+        0,
+        0
+      ],
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "exprlab-10-include-other-fields",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "exprlab/10-include-other-fields",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000116",
+      "position": [
+        220,
+        0
+      ],
+      "name": "Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "jsCode": "return ($('Webhook').first().json.body.items ?? [{ id: 1 }]).map((json) => ({ json }));"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000117",
+      "position": [
+        440,
+        0
+      ],
+      "name": "start",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Stands in for the step that fails (a decrypt step in the thread).\nif ($json.fail) return { json: { error: $json.fail } };\nreturn { json: { id: $json.id, status: 'processed' } };"
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000118",
+      "position": [
+        660,
+        0
+      ],
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"e_event\": \"PROCESSOR_REQUEST_FAILED\",\n  \"msg\": {{ $('start').all()[0].json.error }}\n}",
+        "includeOtherFields": true,
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Items": {
+      "main": [
+        [
+          {
+            "node": "start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
