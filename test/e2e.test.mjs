@@ -101,7 +101,9 @@ const msgs = (result, node = 'Edit Fields') => (result.nodes[node] ?? []).flatMa
 
 before(async () => {
   // bootstrap.sh publishes every workflow before n8n starts.
-  await until(async () => (await fetch(`${BASE}/webhook/exprlab/11-unquoted-in-json-fixed`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })).status === 200, 600_000);
+  // While n8n starts, every path answers 200 with a "starting up" page.
+  const answered = async (response) => response.status === 200 && !(await response.text()).startsWith('n8n is starting up');
+  await until(async () => answered(await fetch(`${BASE}/webhook/exprlab/11-unquoted-in-json-fixed`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })), 600_000);
 
   // Owner and API key through n8n's own endpoints, the ones the first-run
   // screen and Settings > n8n API use.
